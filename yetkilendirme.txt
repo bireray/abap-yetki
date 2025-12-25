@@ -1,0 +1,101 @@
+
+MAIN
+
+*&---------------------------------------------------------------------*
+*& Report ZEO_AUTHENTICATION
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT ZEO_AUTHENTICATION.
+
+INCLUDE ZEO_AUTHENTICATION_TOP.
+INCLUDE ZEO_AUTHENTICATION_FORM.
+
+
+
+
+
+
+*******************************************************************************************
+
+
+TOP DATA DECLARATIONS
+
+*&---------------------------------------------------------------------*
+*&  Include           ZEO_AUTHENTICATION_TOP
+*&---------------------------------------------------------------------*
+TABLES: sscrfields, zdw_eo_reguser.
+DATA: gs_output TYPE zdw_eo_reguser.
+
+sscrfields-ucomm = sy-ucomm.
+
+SELECTION-SCREEN BEGIN OF BLOCK b1 WITH FRAME TITLE TEXT-001.
+SELECTION-SCREEN PUSHBUTTON:
+5(15)  icn_del   USER-COMMAND button_del ,
+25(15) icn_invo  USER-COMMAND button_invo,
+45(15) icn_ord   USER-COMMAND button_ord ,
+65(15) icn_back  USER-COMMAND button_back.
+SELECTION-SCREEN END OF BLOCK b1.
+
+INITIALIZATION. "buton özellikleri gözüksün istiyorsan initilization şart
+
+PERFORM getdata_modscreen.
+PERFORM modscreen.
+
+icn_del  = '@CC@'  && 'TESLİMAT'.
+icn_invo = '@9U@'  && 'FATURA'.
+icn_ord  = '@9Z@'  && 'SİPARİŞ'.
+
+
+*******************************************************************************************
+
+FORM - DATA PROCESS
+
+
+*&---------------------------------------------------------------------*
+*&      Form  GETDATA_MODSCREEN
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+*  -->  p1        text
+*  <--  p2        text
+*----------------------------------------------------------------------*
+FORM getdata_modscreen .
+
+  SELECT SINGLE *
+    FROM zdw_eo_reguser
+    INTO gs_output
+   WHERE uname EQ sy-uname.
+
+
+ENDFORM.
+
+FORM modscreen.
+
+  LOOP AT SCREEN.
+    CASE screen-name.
+      WHEN 'ICN_DEL'.
+        IF gs_output-delivery NE 'X'.
+          screen-input = 0.
+          MODIFY SCREEN.
+        ENDIF.
+      WHEN 'ICN_INVO'.
+        IF gs_output-invoice NE 'X'.
+          screen-input = 0.
+          MODIFY SCREEN.
+        ENDIF.
+      WHEN 'ICN_ORD'.
+        IF gs_output-orderr NE 'X'.
+          screen-input = 0.
+          MODIFY SCREEN.
+        ENDIF.
+      WHEN OTHERS.
+        SET SCREEN 0.
+    ENDCASE.
+  ENDLOOP.
+
+ENDFORM.
+
+
+
+
